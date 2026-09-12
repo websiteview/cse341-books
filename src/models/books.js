@@ -1,11 +1,17 @@
 import { getDb } from '../db/connect.js';
 
 const getAllBooks = async () => {
-  return await getDb().collection('books').find({}).toArray();
+  const db = getDb();
+  const collection = db.collection('books');
+  const books = await collection.find({}).toArray();
+  return books;
 };
 
 const getBookById = async (bookId) => {
-  return await getDb().collection('books').findOne({ id: bookId });
+  const db = getDb();
+  const collection = db.collection('books');
+  const book = await collection.findOne({ id: bookId });
+  return book;
 };
 
 export { getAllBooks, getBookById };
