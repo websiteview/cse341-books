@@ -1,18 +1,20 @@
 import { getAllBooks, getBookById } from '../models/books.js';
 
-const getBooks = async (req, res) => {
+const getBooksHandler = async (req, res) => {
   try {
     const books = await getAllBooks();
-    res.status(200).json(books);
+    return res.status(200).json(books);
   } catch (error) {
-    console.error('Error getting books:', error);
-    res.status(500).json({ message: 'Failed to get books' });
+    console.error('GET /books failed:', error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const getBook = async (req, res) => {
+const getBookByIdHandler = async (req, res) => {
+  const requestedId = req.params.id;
+
   try {
-    const book = await getBookById(req.params.id);
+    const book = await getBookById(requestedId);
 
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
@@ -20,9 +22,9 @@ const getBook = async (req, res) => {
 
     return res.status(200).json(book);
   } catch (error) {
-    console.error('Error getting book:', error);
-    return res.status(500).json({ message: 'Failed to get book' });
+    console.error('GET /books/:id failed:', error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-export { getBooks, getBook };
+export { getBooksHandler, getBookByIdHandler };
