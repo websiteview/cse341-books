@@ -35,7 +35,12 @@ const updateBook = async (bookId, updatedBook) => {
 
   const result = await collection.updateOne(
     { id: bookId },
-    { $set: updatedBook }
+    {
+      $set: updatedBook,
+      $unset: {
+        author: ''
+      }
+    }
   );
 
   return result;

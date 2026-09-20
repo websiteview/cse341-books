@@ -6,6 +6,8 @@ import {
   deleteBook
 } from '../models/books.js';
 
+import { getDb } from '../db/connect.js';
+
 // GET /books
 const getBooksHandler = async (req, res) => {
   try {
@@ -49,19 +51,31 @@ const createBookHandler = async (req, res) => {
   try {
     const {
       id,
-      author,
+      authorId,
       title,
       publicationDate
     } = req.body;
 
     // Validate required fields
-    if (!id || !author || !title || !publicationDate) {
+    if (!id || !authorId || !title || !publicationDate) {
       return res.status(400).json({
-        message: 'id, author, title, and publicationDate are required'
+        message: 'id, authorId, title, and publicationDate are required'
       });
     }
 
-    // Check if the ID already exists
+    // Check if the author exists
+    const db = getDb();
+    const author = await db.collection('authors').findOne({
+      id: authorId
+    });
+
+    if (!author) {
+      return res.status(400).json({
+        message: 'Invalid authorId: author does not exist'
+      });
+    }
+
+    // Check if the book ID already exists
     const existingBook = await getBookById(id);
 
     if (existingBook) {
@@ -73,14 +87,13 @@ const createBookHandler = async (req, res) => {
     // Create the new book
     const newBook = {
       id,
-      author,
+      authorId,
       title,
       publicationDate
     };
 
     const result = await createBook(newBook);
 
-    // Check that MongoDB inserted the document
     if (!result.insertedId) {
       return res.status(500).json({
         message: 'Unable to create book'
@@ -104,21 +117,33 @@ const updateBookHandler = async (req, res) => {
 
   try {
     const {
-      author,
+      authorId,
       title,
       publicationDate
     } = req.body;
 
     // Validate required fields
-    if (!author || !title || !publicationDate) {
+    if (!authorId || !title || !publicationDate) {
       return res.status(400).json({
-        message: 'author, title, and publicationDate are required'
+        message: 'authorId, title, and publicationDate are required'
+      });
+    }
+
+    // Check if the author exists
+    const db = getDb();
+    const author = await db.collection('authors').findOne({
+      id: authorId
+    });
+
+    if (!author) {
+      return res.status(400).json({
+        message: 'Invalid authorId: author does not exist'
       });
     }
 
     // Data to update
     const updatedBook = {
-      author,
+      authorId,
       title,
       publicationDate
     };
@@ -128,7 +153,6 @@ const updateBookHandler = async (req, res) => {
       updatedBook
     );
 
-    // Check if a document was actually found
     if (result.matchedCount === 0) {
       return res.status(404).json({
         message: 'Book not found'
@@ -156,7 +180,6 @@ const deleteBookHandler = async (req, res) => {
   try {
     const result = await deleteBook(requestedId);
 
-    // Check if a document was actually deleted
     if (result.deletedCount === 0) {
       return res.status(404).json({
         message: 'Book not found'
