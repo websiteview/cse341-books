@@ -1,7 +1,7 @@
 import dns from 'dns';
 import { MongoClient } from 'mongodb';
 
-//dns.setServers(['8.8.8.8']);//
+dns.setServers(['8.8.8.8']);
 
 let database;
 
@@ -15,7 +15,11 @@ const connectToDb = async () => {
 
   }
 
-  const client = new MongoClient(connectionString);
+ // const client = new MongoClient(connectionString);//
+const client = new MongoClient(connectionString, {
+  serverSelectionTimeoutMS: 10000,
+  tls: true
+});
 
   await client.connect();
 
