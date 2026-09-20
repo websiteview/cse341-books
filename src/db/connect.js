@@ -1,7 +1,7 @@
 import dns from 'dns';
 import { MongoClient } from 'mongodb';
 
-dns.setServers(['8.8.8.8']);
+//dns.setServers(['8.8.8.8']);//
 
 let database;
 
